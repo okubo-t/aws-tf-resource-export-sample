@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Terraform Resource info Export Template"
+
+Resources:
+  TfStateBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: ${tfstate_backend["s3_bucket_name"]}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  TfStateLockTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${tfstate_backend["dynamodb_for_state_lock"]}
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      AttributeDefinitions:
+        - AttributeName: "LockID"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "LockID"
+          KeyType: "HASH"
+
+Outputs:
+  PrivateSubnet1a:
+    Description: "Id for PrivateSubnet 1a"
+    Export:
+      Name: ${network["private_subnet_1a_name"]}
+    Value: ${network["private_subnet_1a_id"]}
+
+  PrivateSubnet1c:
+    Description: "Id for PrivateSubnet 1c"
+    Export:
+      Name: ${network["private_subnet_1c_name"]}
+    Value: ${network["private_subnet_1c_id"]}
+
+  HelloWorldFunctionSG:
+    Description: "Security Group for HelloWorldFunction"
+    Export:
+      Name: ${security_group["name_for_lambda"]}
+    Value: ${security_group["id_for_lambda"]}
